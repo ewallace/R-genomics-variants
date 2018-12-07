@@ -18,7 +18,7 @@ navbar:
       href: code-handout.R
   right:
     - icon: fa-github fa-lg
-      href: https://github.com/datacarpentry/R-ecology-lesson
+      href: https://github.com/ewallace/R-genomics
 output_dir: "_site"
 exclude: ["portal-database.sqlite", "DESCRIPTION", "Makefile"]
 include: ["code-handout.R"]

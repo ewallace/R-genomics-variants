@@ -2,6 +2,28 @@
 
 SNPs_tidy <- read_tsv("data/SNPs_tidy.txt")
 SNPs_tidy
+ggplot(data = SNPs_tidy, aes(x = POS, y = REF)) +
+    geom_point()
+## ## Assign plot to a variable
+## SNPs_plot <- ggplot(data = SNPs_tidy, aes(x = POS, y = REF))
+## ## Draw the plot
+## SNPs_plot +
+##     geom_point()
+ggplot(data = SNPs_tidy, aes(x = POS, y = REF)) +
+    geom_point(aes(color = ALT))
+ggplot(data = SNPs_tidy, aes(x=POS)) +
+    geom_histogram()
+ggplot(data = SNPs_tidy, aes(x = MUT)) +
+    geom_bar()
+ggplot(data = SNPs_tidy, aes(x = MUT, fill = SAMPLE)) +
+    geom_bar(position=position_dodge())
+ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
+    geom_point(position=position_jitter())
+ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
+    geom_boxplot()
+ggplot(data = SNPs_tidy, aes(x=POS)) +
+    geom_histogram() +
+    facet_wrap(~SAMPLE)
 
 
 ### Creating objects in R
