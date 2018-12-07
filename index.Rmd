@@ -1,6 +1,6 @@
 ---
-title: "Data Analysis and Visualization in R for Ecologists"
-author: François Michonneau & Auriel Fournier (Lesson Maintainers)
+title: "Data Analysis and Visualization in R for Genomics"
+author: Edward Wallace, François Michonneau & Auriel Fournier (Lesson Maintainers)
 ---
 
 <p></p>
@@ -15,7 +15,7 @@ author: François Michonneau & Auriel Fournier (Lesson Maintainers)
 Data Carpentry's aim is to teach researchers basic concepts, skills,
 and tools for working with data so that they can get more done in less
 time, and with less pain. The lessons below were designed for those interested
-in working with ecology data in R.
+in working with genomics data in R.
 
 This is an introduction to R designed for participants with no programming
 experience. These lessons can be taught in a day (~ 6 hours). They start with
@@ -30,10 +30,8 @@ how to work with databases directly from R.
 
 1. [Before we start](00-before-we-start.html)
 2. [Introduction to R](01-intro-to-r.html)
-3. [Starting with data](02-starting-with-data.html)
-4. [Aggregating and analyzing data with dplyr](03-dplyr.html)
-5. [Data visualization with **`ggplot2`**](04-visualization-ggplot2.html)
-6. [R and Databases](05-r-and-databases.html)
+3. [Data visualization with **`ggplot2`**](02-visualizing-ggplot.html)
+4. [Starting with data](03-starting-with-data.html)
 
 
 
@@ -48,10 +46,12 @@ the data and install everything *before* working through this lesson.
 
 ### Data
 
-Data files for the lesson are available and can be downloaded manually here: <https://doi.org/10.6084/m9.figshare.1314459>
+Data files for the lesson are available and can be downloaded manually:
 
-However, we will download them directly from R during the lessons when we need
-them.
+https://datasync.ed.ac.uk/index.php/s/joLsSXedpyaABHe
+
+password: genomics-carpentry
+
 
 ### Setup instructions
 
