@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/datacarpentry/R-ecology-lesson.svg?branch=master)](https://travis-ci.org/datacarpentry/R-ecology-lesson)
+[![Build Status](https://travis-ci.org/ewallace/R-genomics-variants.svg?branch=master)](https://travis-ci.org/ewallace/R-genomics-variants)
 [![Create a Slack Account with us](https://img.shields.io/badge/Create_Slack_Account-The_Carpentries-071159.svg)](https://swc-slack-invite.herokuapp.com/)
 [![Slack Status](https://img.shields.io/badge/Slack_Channel-DC_Ecology_R-E01563.svg)](https://swcarpentry.slack.com/messages/C9X9EC405)
 
@@ -17,17 +17,15 @@ introduction to plotting. There is also a lesson on how to use databases from R 
 ## Prerequisites
 
 > * Having R and RStudio installed (though see the first
-> lesson, [Before we start](http://datacarpentry.org/R-ecology-lesson/00-before-we-start.html) for installation
+> lesson, [Before we start](http://ewallace.github.io/R-genomics-variants/00-before-we-start.html) for installation
 > instructions)
 
 ## Topics
 
-* [Before we start](http://datacarpentry.org/R-ecology-lesson/00-before-we-start.html)
-* [Introduction to R](http://datacarpentry.org/R-ecology-lesson/01-intro-to-r.html)
-* [Starting with data](http://datacarpentry.org/R-ecology-lesson/02-starting-with-data.html)
-* [Aggregating and analyzing data with dplyr](http://datacarpentry.org/R-ecology-lesson/03-dplyr.html)
-* [Data visualization with ggplot2](http://datacarpentry.org/R-ecology-lesson/04-visualization-ggplot2.html)
-* [R and Databases](http://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html)
+* [Before we start](http://ewallace.github.io/R-genomics-variants/00-before-we-start.html)
+* [Introduction to R](http://ewallace.github.io/R-genomics-variants/01-intro-to-r.html)
+* [Data visualization with ggplot2](http://ewallace.github.io/R-genomics-variants/02-visualization-ggplot2.html)
+* [Starting with data](http://ewallace.github.io/R-genomics-variants/03-starting-with-data.html)
 
 ## Code handout
 
@@ -45,10 +43,6 @@ we encourage you to review our [contributing guide](CONTRIBUTING.Rmd).
 ## Questions
 
 If you have any questions or feedback, please open an issue, contact the
-maintainers, or come chat with us on the [Slack Channel for this lesson](https://swcarpentry.slack.com/messages/C9X9EC405). If you don't already have a Slack account with the Carpentries, you can [create one](https://swc-slack-invite.herokuapp.com/).
+maintainers
 
-* Ana Costa Conrado
-* Auriel Fournier
-* François Michonneau
-* Brian Seok
-* Shiva Guru
+* Edward Wallace
