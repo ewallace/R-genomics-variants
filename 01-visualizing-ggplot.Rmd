@@ -84,7 +84,7 @@ ggplot(data = SNPs_tidy, aes(x = POS, y = REF))
 
 To add a geom to the plot use the `+` operator. Because we have two continuous variables, let's use `geom_point()` first to create a scatter plot:
 
-```{r first-ggplot, purl=FALSE}
+```{r first-ggplot}
 ggplot(data = SNPs_tidy, aes(x = POS, y = REF)) +
     geom_point()
 ```
@@ -94,7 +94,7 @@ you to modify existing `ggplot` objects. This means you can easily set up plot
 templates and explore different types of plots, so the above plot can also be
 generated with code like this:
 
-```{r, first-ggplot-with-plus, eval=FALSE, purl=FALSE}
+```{r, first-ggplot-with-plus, eval=FALSE}
 ## Assign plot to a variable
 SNPs_plot <- ggplot(data = SNPs_tidy, aes(x = POS, y = REF))
 ## Draw the plot
@@ -124,7 +124,7 @@ ggplot(data = SNPs_tidy, aes(x = POS, y = REF)) +
 Or to color each alternate nucleotide substitution in the plot differently, you could specify the variable to use to the `color` argument within `aes()`:
 
 
-```{r color-by-alternative, purl=FALSE}
+```{r color-by-alternative}
 ggplot(data = SNPs_tidy, aes(x = POS, y = REF)) +
     geom_point(aes(color = ALT))
 ```
@@ -154,7 +154,7 @@ What if we want to see the density of these across the genome (POSITION)?
 
 GGplot provides histogram and smoothed density plots to enable this.
 
-```{r pos-density, purl=FALSE}
+```{r pos-density}
 ggplot(data = SNPs_tidy, aes(x=POS)) +
     geom_histogram()
 ```
@@ -181,7 +181,7 @@ What if we just want to count the different substitutions and display in a bar p
 
 To count the number of substitutions with a given reference:
 
-```{r barplot-ref, purl=FALSE}
+```{r barplot-ref}
 ggplot(data = SNPs_tidy, aes(x = MUT)) +
     geom_bar()
 ```
@@ -202,7 +202,7 @@ ggplot(data = SNPs_tidy, aes(x = MUT, fill = SAMPLE)) +
 
 To plot the bars dodged next to each other instead of stacked on top, we use the `position=position_dodge()`.
 
-```{r barplot-fill-by-alternative-dodge, purl=FALSE}
+```{r barplot-fill-by-alternative-dodge}
 ggplot(data = SNPs_tidy, aes(x = MUT, fill = SAMPLE)) +
     geom_bar(position=position_dodge())
 ```
@@ -226,7 +226,7 @@ ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
 
 Many points are on top, we can't see the distribution. We can fix this with scatterplots with 'position="jitter"`. 
 
-```{r quality-jitter, purl=FALSE}
+```{r quality-jitter}
 ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
     geom_point(position=position_jitter())
 ```
@@ -247,7 +247,7 @@ ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
 
 Another way to summarize data is the boxplot
 
-```{r quality-boxplot, purl=FALSE}
+```{r quality-boxplot}
 ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
     geom_boxplot()
 ```
@@ -296,7 +296,7 @@ ggplot(data = SNPs_tidy, aes(x=POS)) +
 
 Now we can facet by sample, to get the count in each sample:
 
-```{r pos-density-facet, purl=FALSE}
+```{r pos-density-facet}
 ggplot(data = SNPs_tidy, aes(x=POS)) +
     geom_histogram() +
     facet_wrap(~SAMPLE)
