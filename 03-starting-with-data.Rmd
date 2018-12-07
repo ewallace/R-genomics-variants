@@ -1,0 +1,622 @@
+---
+title: "Starting with data"
+author: "Data Carpentry contributors"
+minutes: 15
+---
+
+```{r, echo=FALSE, purl=FALSE, message = FALSE}
+source("setup.R")
+```
+
+### Starting with data
+
+------------
+
+> ### Learning Objectives
+>
+> * Describe what a data frame is.
+> * Load external data from a .csv file into a data frame.
+> * Summarize the contents of a data frame.
+> * Extract the contents of a data frame.
+<!-- > * Describe what a factor is. -->
+<!-- > * Convert between strings and factors. -->
+<!-- > * Reorder and rename factors. -->
+<!-- > * Change how character strings are handled in a data frame. -->
+> * Format dates.
+
+------------
+
+## Presentation of the variant calling data
+
+```{r, echo=FALSE, purl=TRUE}
+### Presentation of the survey data
+```
+
+We are studying the mutations in *E. coli* populations in our study.
+
+
+
+The dataset is stored as a variant calling file (vcf), which like many genomics file formats is a tab-separated text file, starting with a **header**. The header contains background information about the dataset and how the file was made, and is indicated by the lines starting with the comment character '##'. The full description of the vcf format is at `https://github.com/samtools/hts-specs`, and on wikipedia at `https://en.wikipedia.org/wiki/Variant_Call_Format`.
+
+Each row holds information for a single variant mutation, and the columns represent:
+
+| Column  | Description                                                    |
+|---------|----------------------------------------------------------------|
+| CHROM   | name of the sequence/chromosome                                |
+| POS     | position of the variation on the sequence                      |
+| ID      | database identifier of the variation, if known                 |
+| REF     | the reference sequence allele/base                             |
+| ALT     | alternative allele(s)/base(s) detected                         |
+| QUAL    | quality score associated with the inference of the alleles     |
+| FILTER  | flag indicating which filters the variation has passed         |
+| INFO    | key-value pairs describing the variation                       |
+| FORMAT  | optional fields specified in file header                       |
+| SAMPLEs | values for fields listed in FORMAT, one column for each sample |
+
+
+
+We are going to use the R function `download.file()` to download the CSV file
+that contains the survey data from figshare, and we will use `read_tsv()` from
+the **`readr`** package (one of the packages in the **`tidyverse`**) to load
+into memory the content of the CSV file as a modern `data.frame` (also known as
+a "tibble"). Inside the download.file command, the first entry is a character string with the source URL 
+("https://ndownloader.figshare.com/files/2292169"). This source URL downloads a CSV file from 
+figshare. The text after the comma ("data/portal_data_joined.csv") is the destination of the 
+file on your local machine. You'll need to have a folder on your machine called "data" where 
+you'll download the file. So this command downloads a file from figshare, names it 
+"portal_data_joined.csv," and adds it to a preexisting folder named "data."
+
+```{r, eval=FALSE, purl=TRUE}
+download.file(url="https://ndownloader.figshare.com/files/2292169",
+              destfile = "data/portal_data_joined.csv")
+```
+
+Load the **`tidyverse`** for the `read_tsv()` function:
+
+```{r, eval=TRUE, message = FALSE, purl=TRUE}
+library("tidyverse")
+```
+
+
+We are going to use the R function `download.file()` to download the CSV file
+that contains the survey data from figshare, and we will use `read_tsv()` from
+the **`readr`** package (one of the packages in the **`tidyverse`**) to load
+into memory the content of the CSV file as a modern `data.frame` (also known as
+a "tibble"). Inside the download.file command, the first entry is a character string with the source URL 
+("https://ndownloader.figshare.com/files/2292169"). This source URL downloads a CSV file from 
+figshare. The text after the comma ("data/portal_data_joined.csv") is the destination of the 
+file on your local machine. You'll need to have a folder on your machine called "data" where 
+you'll download the file. So this command downloads a file from figshare, names it 
+"portal_data_joined.csv," and adds it to a preexisting folder named "data."
+
+```{r, eval=FALSE, purl=TRUE}
+download.file(url="https://ndownloader.figshare.com/files/2292169",
+              destfile = "data/portal_data_joined.csv")
+```
+
+The first and most important part is to get data in to R in the format you want. Getting this **data wrangling** right is the key to being able to do useful things later, so it is worth spending time on.
+
+It is always good to start by looking at the raw text file to check it is in the right format. We could use a text editor outside R, for example nano, textedit, or notepad. Inside R we can use the `read_lines` function in the tidyverse .
+
+```{r, eval=TRUE,  purl=FALSE}
+read_lines("data/SRR097977_final_variants.vcf")
+```
+
+This gives us a list of character vectors, one for each line. Too many to see! 
+
+Let's use the `n_max` argument of read_lines to see the top few lines
+
+```{r, eval=TRUE,  purl=FALSE}
+?read_lines
+read_lines("data/SRR097977_final_variants.vcf", n_max=10)
+read_lines("data/SRR097977_final_variants.vcf", n_max=40)
+```
+
+We can see that the first few lines start with two hashes, `##`. Like the comment character in R code, this indicates the file header. Line 37 and onwards have many `\t` is a tab character, telling us that this is tab-separated variable (tsv) format. As described in the vcf format, line 37 is the column headers and lines 38 onwards are the variant calling data. 
+
+So we need to read the tsv data, skipping the first 36 lines:
+
+```{r, eval=TRUE,  purl=FALSE}
+variants <- read_tsv("data/SRR097977_final_variants.vcf",skip=36)
+```
+
+The `read_tsv()` function in tidyverse prints a message informing us on its best guess of
+the column contents. However, this statement doesn't produce any output because,
+as you might recall, assignments don't display anything. If we want to check
+that our data has been loaded properly, we can see the contents of the data by typing its name:
+
+```{r, eval=TRUE, purl=TRUE, results='markup'}
+variants
+```
+
+In this output, `R` tells us that the `variants` object is "a tibble". Tibble data
+frames display an abbreviated view of their contents when printed. Also notice
+that this condensed view gives us some clues about the size of the data and types
+of the columns. Further, this abbreviation shows us the first 10 lines and enough
+of the columns to fill your console window. If you would like to see the entire
+data frame, try "viewing" your data instead:
+
+```{r, eval = FALSE, purl=FALSE}
+View(variants)
+```
+
+Another view of this data frame is with the `str()` function:
+```{r, eval = FALSE, purl=FALSE}
+str(variants)
+```
+
+## Getting and changing column names
+
+We've noticed that the first name of `variants` is `#CHROM`, but that comment character is unpleasant and inconvenient. Can we change it?
+
+To see the column names, we use the `names` function:
+
+```{r, eval = FALSE, purl=FALSE}
+names(variants)
+```
+
+We want to change the first column name, and we can set this also using the names function, but assigning the replacement name to its first value.
+
+```{r, eval = TRUE, purl=FALSE}
+names(variants)[1] <- "CHROM"
+variants
+```
+
+```{r, echo=FALSE, purl=TRUE}
+
+## Challenge
+## Based on printing `variants` and the values `names(variants)`, can you
+## * Change the name of the tenth column to the short sample name "SRR097977"?
+
+```
+
+> ### Note
+>
+> 
+> We used `read_tsv()` for importing tab-separated data files.
+> There is also `read_csv` which assumes that fields are delineated by commas. However, in several
+> countries, the comma is used as a decimal separator and the semicolon (;) is
+> used as a field delineator. If you want to read in files of this type in R,
+> you can use the `read_csv2` function. It behaves exactly like `read_csv` but
+> uses different parameters for the decimal and the field separators. If you are
+> working with another format, they can be both specified by the user. Check out
+> the help for `read_csv()` by typing `?read_csv` to learn more.  It is important to
+> note that all of these functions are actually wrapper functions for the main
+> `read_delim()` function with different arguments. As such, the variants data
+> above could have also been loaded by using `read_delim()` with the `delim`
+> argument as `,`. The code is as follows:
+> `variants <- read_delim(file = "data/SRR097977_final_variants.vcf", skip=36,delim = "\t")`.
+
+## What are tibbles and data frames?
+
+Data frames are the _de facto_ data structure for most tabular data, and what we
+use for statistics and plotting. Tibbles are data frames that display nicer.
+
+A data frame can be created by hand, but most commonly they are generated by the
+functions `read_tsv()`, `read_csv()` or `read_delim()`; in other words, when importing
+spreadsheets from your hard drive (or the web). You can think of a data frame as a spreadsheet with constraints.
+
+A data frame is the representation of data in the format of a table where the
+columns are vectors that all have the same length. Because columns are
+vectors, each column must contain a single type of data (e.g., characters, integers,
+factors). For example, here is a figure depicting a data frame comprising a
+numeric, a character, and a logical vector.
+
+![](./img/data-frame.svg)
+
+
+We can see this when inspecting the <b>str</b>ucture of a data frame
+with the function `str()`:
+
+```{r, purl=FALSE}
+str(variants)
+```
+
+## Inspecting `data.frame` Objects
+
+We already saw how the printing the data frame and the `str()` function can be
+useful to check the content and the structure of a data frame. Here is a non-
+exhaustive list of functions to get a sense of the content/structure of the
+data. Let's try them out!
+
+* Size:
+    * `dim(variants)` - returns a vector with the number of rows in the first element,
+          and the number of columns as the second element (the **dim**ensions of
+          the object)
+    * `nrow(variants)` - returns the number of rows
+    * `ncol(variants)` - returns the number of columns
+
+* Content:
+    * `head(variants)` - shows the first 6 rows
+    * `tail(variants)` - shows the last 6 rows
+
+* Names:
+    * `names(variants)` - returns the column names (synonym of `colnames()` for `data.frame`
+	   objects)
+    * `rownames(variants)` - returns the row names
+
+* Summary:
+    * `str(variants)` - structure of the object and information about the class, length and
+	   content of  each column
+    * `summary(variants)` - summary statistics for each column
+
+Note: most of these functions are "generic", they can be used on other types of
+objects besides `data.frame`.
+
+
+> ### Challenge
+>
+> Based on printing `variants` and the output of `str(variants)`, can you answer
+> the following questions?
+>
+> * What are are the classes of the object `variants`?
+> * How many rows and how many columns are in this object?
+> * How many columns contain character information?
+>
+> ```{r, answer=TRUE, results="markup", purl=FALSE}
+>
+> str(variants)
+>
+> ## * class: data frame
+> ## * how many rows: 34786,  how many columns: 13
+> ## * how many character columns: 6
+>
+> ```
+
+
+```{r, echo=FALSE, purl=TRUE}
+
+## Challenge
+## Based on printing `variants` and the the output of `str(variants)`, can you answer the following questions?
+## * What are are the classes of the object `variants`?
+## * How many rows and how many columns are in this object?
+## * How many columns contain character information?
+
+```
+
+
+
+
+## Indexing and subsetting data frames
+
+```{r, echo=FALSE, purl=TRUE}
+
+## Indexing and subsetting data frames
+```
+
+
+Our survey data frame has rows and columns (it has 2 dimensions), if we want to
+extract some specific data from it, we need to specify the "coordinates" we
+want from it. Row numbers come first, followed by column numbers. However, note
+that different ways of specifying these coordinates lead to results with
+different classes.
+
+
+```{r, purl=FALSE}
+# first element in the first column of the data frame (as a vector)
+variants[1, 1]   
+# first element in the 6th column (as a vector)
+variants[1, 6]   
+# first column of the data frame (as a vector)
+variants[, 1]    
+# first column of the data frame (as a data.frame)
+variants[1]      
+# first three elements in the 7th column (as a vector)
+variants[1:3, 7] 
+# the 3rd row of the data frame (as a data.frame)
+variants[3, ]    
+# equivalent to head_variants <- head(variants)
+head_variants <- variants[1:6, ] 
+```
+
+`:` is a special function that creates numeric vectors of integers in increasing
+or decreasing order, test `1:10` and `10:1` for instance.
+
+You can also exclude certain indices of a data frame using the "`-`" sign:
+
+```{r, purl=FALSE}
+variants[, -1]          # The whole data frame, except the first column
+variants[-c(7:34786), ] # Equivalent to head(variants)
+```
+
+Data frames can be subset by calling indices (as shown previously), but also by calling their column names directly:
+
+```{r, eval = FALSE, purl=FALSE}
+variants["POS"]       # Result is a data.frame
+variants[, "POS"]     # Result is a data.frame
+variants[["POS"]]     # Result is a vector
+variants$POS          # Result is a vector
+```
+
+In RStudio, you can use the autocompletion feature to get the full and correct names of the columns.
+
+> ### Challenge
+>
+> 1. Create a `data.frame` (`variants_200`) containing only the data in
+>    row 200 of the `variants` dataset.
+>
+> 2. Notice how `nrow()` gave you the number of rows in a `data.frame`?
+>
+>      * Use that number to pull out just that last row in the data frame.
+>      * Compare that with what you see as the last row using `tail()` to make
+>        sure it's meeting expectations.
+>      * Pull out that last row using `nrow()` instead of the row number.
+>      * Create a new data frame (`variants_last`) from that last row.
+>
+> 3. Use `nrow()` to extract the row that is in the middle of the data
+>    frame. Store the content of this row in an object named `variants_middle`.
+>
+> 4. Combine `nrow()` with the `-` notation above to reproduce the behavior of
+>    `head(variants)`, keeping just the first through 6th rows of the variants
+>    dataset.
+>
+> ```{r, answer=TRUE, purl=FALSE}
+> ## 1.
+> variants_200 <- variants[200, ]
+> ## 2.
+> # Saving `n_rows` to improve readability and reduce duplication
+> n_rows <- nrow(variants)
+> variants_last <- variants[n_rows, ]
+> ## 3.
+> variants_middle <- variants[n_rows / 2, ]
+> ## 4.
+> variants_head <- variants[-(7:n_rows), ]
+> ```
+
+
+```{r, echo=FALSE, purl=TRUE}
+### Challenges:
+###
+### 1. Create a `data.frame` (`variants_200`) containing only the
+###    data in row 200 of the `variants` dataset.
+###
+### 2. Notice how `nrow()` gave you the number of rows in a `data.frame`?
+###
+###      * Use that number to pull out just that last row in the data frame
+###      * Compare that with what you see as the last row using `tail()` to make
+###        sure it's meeting expectations.
+###      * Pull out that last row using `nrow()` instead of the row number
+###      * Create a new data frame object (`variants_last`) from that last row
+###
+### 3. Use `nrow()` to extract the row that is in the middle of the
+###    data frame. Store the content of this row in an object named
+###    `variants_middle`.
+###
+### 4. Combine `nrow()` with the `-` notation above to reproduce the behavior of
+###    `head(variants)`, keeping just the first through 6th rows of the variants
+###    dataset.
+
+```
+
+<!-- ## Factors -->
+
+<!-- ```{r, echo=FALSE, purl=TRUE} -->
+<!-- ### Factors -->
+<!-- ``` -->
+
+<!-- When we did `str(variants)` we saw that several of the columns consist of -->
+<!-- integers. The columns `genus`, `species`, `sex`, `plot_type`, ... however, are -->
+<!-- of a special class called `factor`. Factors are very useful and actually -->
+<!-- contribute to making R particularly well suited to working with data. So we are -->
+<!-- going to spend a little time introducing them. -->
+
+<!-- Factors represent categorical data. They are stored as integers associated with labels and they can be ordered or unordered. While factors look (and often behave) like character vectors, they are actually treated as integer vectors by R. So you need to be very careful when treating them as strings. -->
+
+<!-- Once created, factors can only contain a pre-defined set of values, known as -->
+<!-- *levels*. By default, R always sorts levels in alphabetical order. For -->
+<!-- instance, if you have a factor with 2 levels: -->
+
+<!-- ```{r, purl=TRUE} -->
+<!-- sex <- factor(c("male", "female", "female", "male")) -->
+<!-- ``` -->
+
+<!-- R will assign `1` to the level `"female"` and `2` to the level `"male"` (because -->
+<!-- `f` comes before `m`, even though the first element in this vector is -->
+<!-- `"male"`). You can see this by using the function `levels()` and you can find the -->
+<!-- number of levels using `nlevels()`: -->
+
+<!-- ```{r, purl=FALSE} -->
+<!-- levels(sex) -->
+<!-- nlevels(sex) -->
+<!-- ``` -->
+
+<!-- Sometimes, the order of the factors does not matter, other times you might want -->
+<!-- to specify the order because it is meaningful (e.g., "low", "medium", "high"), -->
+<!-- it improves your visualization, or it is required by a particular type of -->
+<!-- analysis. Here, one way to reorder our levels in the `sex` vector would be: -->
+
+<!-- ```{r, results=TRUE, purl=FALSE} -->
+<!-- sex # current order -->
+<!-- sex <- factor(sex, levels = c("male", "female")) -->
+<!-- sex # after re-ordering -->
+<!-- ``` -->
+
+<!-- In R's memory, these factors are represented by integers (1, 2, 3), but are more -->
+<!-- informative than integers because factors are self describing: `"female"`, -->
+<!-- `"male"` is more descriptive than `1`, `2`. Which one is "male"?  You wouldn't -->
+<!-- be able to tell just from the integer data. Factors, on the other hand, have -->
+<!-- this information built in. It is particularly helpful when there are many levels -->
+<!-- (like the species names in our example dataset). -->
+
+<!-- ### Converting factors -->
+
+<!-- If you need to convert a factor to a character vector, you use -->
+<!-- `as.character(x)`. -->
+
+<!-- ```{r, purl=FALSE} -->
+<!-- as.character(sex) -->
+<!-- ``` -->
+
+<!-- Converting factors where the levels appear as numbers (such as concentration -->
+<!-- levels, or years) to a numeric vector is a little trickier. The `as.numeric()`  -->
+<!-- function returns the index values of the factor, not its levels, so it will  -->
+<!-- result in an entirely new (and unwanted in this case) set of numbers.  -->
+<!-- One method to avoid this is to convert factors to characters, and then to numbers.   -->
+<!-- Another method is to use the `levels()` function. Compare: -->
+
+<!-- ```{r, purl=TRUE} -->
+<!-- year_fct <- factor(c(1990, 1983, 1977, 1998, 1990)) -->
+<!-- as.numeric(year_fct)               # Wrong! And there is no warning... -->
+<!-- as.numeric(as.character(year_fct)) # Works... -->
+<!-- as.numeric(levels(year_fct))[year_fct]    # The recommended way. -->
+<!-- ``` -->
+
+<!-- Notice that in the `levels()` approach, three important steps occur: -->
+
+<!-- * We obtain all the factor levels using `levels(year_fct)` -->
+<!-- * We convert these levels to numeric values using `as.numeric(levels(year_fct))` -->
+<!-- * We then access these numeric values using the underlying integers of the -->
+<!--   vector `year_fct` inside the square brackets -->
+
+<!-- ### Renaming factors -->
+
+<!-- When your data is stored as a factor, you can use the `plot()` function to get a -->
+<!-- quick glance at the number of observations represented by each factor -->
+<!-- level. Let's look at the number of males and females captured over the course of -->
+<!-- the experiment: -->
+
+<!-- ```{r, purl=TRUE} -->
+<!-- ## bar plot of the number of females and males captured during the experiment: -->
+<!-- plot(variants$sex) -->
+<!-- ``` -->
+
+<!-- In addition to males and females, there are about 1700 individuals for which the -->
+<!-- sex information hasn't been recorded. Additionally, for these individuals, -->
+<!-- there is no label to indicate that the information is missing or undetermined. Let's rename this -->
+<!-- label to something more meaningful. Before doing that, we're going to pull out -->
+<!-- the data on sex and work with that data, so we're not modifying the working copy -->
+<!-- of the data frame: -->
+
+<!-- ```{r, results=TRUE, purl=FALSE} -->
+<!-- sex <- variants$sex -->
+<!-- head(sex) -->
+<!-- levels(sex) -->
+<!-- levels(sex)[1] <- "undetermined" -->
+<!-- levels(sex) -->
+<!-- head(sex) -->
+<!-- ``` -->
+
+
+<!-- > ### Challenge -->
+<!-- > -->
+<!-- > * Rename "F" and "M" to "female" and "male" respectively. -->
+<!-- > * Now that we have renamed the factor level to "undetermined", can you recreate the -->
+<!-- >  barplot such that "undetermined" is last (after "male")? -->
+<!-- > -->
+<!-- > ```{r, answer=TRUE, purl=FALSE} -->
+<!-- > levels(sex)[2:3] <- c("female", "male") -->
+<!-- > sex <- factor(sex, levels = c("female", "male", "undetermined")) -->
+<!-- > plot(sex) -->
+<!-- > ```  -->
+
+
+<!-- ```{r wrong-order, results='show', echo=FALSE, purl=TRUE} -->
+<!-- ## Challenges -->
+<!-- ## -->
+<!-- ## * Rename "F" and "M" to "female" and "male" respectively. -->
+<!-- ## * Now that we have renamed the factor level to "undetermined", can you recreate the -->
+<!-- ##   barplot such that "undetermined" is last (after "male") -->
+<!-- ``` -->
+
+
+<!-- ### Using `stringsAsFactors=FALSE` -->
+
+<!-- By default, when building or importing a data frame, the columns that contain -->
+<!-- characters (i.e. text) are coerced (= converted) into factors. Depending on what you want to do with the data, you may want to keep these -->
+<!-- columns as `character`. To do so, `read.csv()` and `read.table()` have an -->
+<!-- argument called `stringsAsFactors` which can be set to `FALSE`. -->
+
+<!-- In most cases, it is preferable to set `stringsAsFactors = FALSE` when importing -->
+<!-- data and to convert as a factor only the columns that require this data -->
+<!-- type. -->
+
+
+<!-- ```{r, eval=FALSE, purl=TRUE} -->
+<!-- ## Compare the difference between our data read as `factor` vs `character`. -->
+<!-- variants <- read.csv("data/portal_data_joined.csv", stringsAsFactors = TRUE) -->
+<!-- str(variants) -->
+<!-- variants <- read.csv("data/portal_data_joined.csv", stringsAsFactors = FALSE) -->
+<!-- str(variants) -->
+<!-- ## Convert the column "plot_type" into a factor -->
+<!-- variants$plot_type <- factor(variants$plot_type) -->
+<!-- ``` -->
+
+
+
+> ### Challenge
+>
+> 1. We have seen how data frames are created when using `read_csv()`, but
+>   they can also be created by hand with the `data_frame()` function.  There are
+>   a few mistakes in this hand-crafted `data_frame`. Can you spot and fix them?
+>   Don't hesitate to experiment!
+>
+>     ```{r, eval=FALSE, purl=FALSE}
+>     animal_data <- data_frame(
+>       animal = c(dog, cat, sea cucumber, sea urchin),
+>       feel = c("furry", "squishy", "spiny"),
+>       weight = c(45, 8 1.1, 0.8)
+>     )
+>     ```
+>
+>     ```{r, eval=FALSE, purl=TRUE, echo=FALSE}
+>     ## Challenge:
+>     ##  There are a few mistakes in this hand-crafted `data_frame`,
+>     ##  can you spot and fix them? Don't hesitate to experiment!
+>     animal_data <- data_frame(
+>       animal = c(dog, cat, sea cucumber, sea urchin),
+>       feel = c("furry", "squishy", "spiny"),
+>       weight = c(45, 8 1.1, 0.8)
+>     )
+>     ```
+>
+> 2. Can you predict the class for each of the columns in the following example?
+>    Check your guesses using `str(country_climate)`:
+>      * Are they what you expected?  Why? Why not?
+>      * What would you need to change to ensure that each column had the accurate data type?
+>
+>     ```{r, eval=FALSE, purl=FALSE}
+>     country_climate <- data_frame(
+>       country = c("Canada", "Panama", "South Africa", "Australia"),
+>       climate = c("cold", "hot", "temperate", "hot/temperate"),
+>       temperature = c(10, 30, 18, "15"),
+>       northern_hemisphere = c(TRUE, TRUE, FALSE, "FALSE"),
+>       has_kangaroo = c(FALSE, FALSE, FALSE, 1)
+>     )
+>     ```
+>
+>    ```{r, eval=FALSE, purl=TRUE, echo=FALSE}
+>    ## Challenge:
+>    ##   Can you predict the class for each of the columns in the following
+>    ##   example?
+>    ##   Check your guesses using `str(country_climate)`:
+>    ##   * Are they what you expected? Why? why not?
+>    ##   * What would you need to change to ensure that each column had the
+>    ##     accurate data type?
+>    country_climate <- data_frame(
+>       country = c("Canada", "Panama", "South Africa", "Australia"),
+>       climate = c("cold", "hot", "temperate", "hot/temperate"),
+>       temperature = c(10, 30, 18, "15"),
+>       northern_hemisphere = c(TRUE, TRUE, FALSE, "FALSE"),
+>       has_kangaroo = c(FALSE, FALSE, FALSE, 1)
+>     )
+>    ```
+>
+>    ```{text_answer, echo=FALSE, purl=FALSE}
+>    * missing quotations around the names of the animals
+>    * missing one entry in the "feel" column (probably for one of the furry animals)
+>    * missing one comma in the weight column
+>    * `country`, `climate`, `temperature`, and `northern_hemisphere` are
+>       characters; `has_kangaroo` is numeric
+>    * removing the quotes in temperature and northern_hemisphere and replacing 1
+>      by TRUE in the `has_kangaroo` column would give what was probably 
+>      intended
+>    ```
+>
+
+The automatic conversion of data type is sometimes a blessing, sometimes an
+annoyance. Be aware that it exists, learn the rules, and double check that data
+you import in R are of the correct type within your data frame. If not, use it
+to your advantage to detect mistakes that might have been introduced during data
+entry (a letter in a column that should only contain numbers for instance).
+
+Learn more in this [RStudio tutorial](https://support.rstudio.com/hc/en-us/articles/218611977-Importing-Data-with-RStudio).

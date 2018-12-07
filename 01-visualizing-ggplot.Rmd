@@ -1,0 +1,435 @@
+---
+title: Data visualization with ggplot2
+author: Data Carpentry contributors
+minutes: 60
+---
+
+
+
+```{r setup, echo=FALSE, purl=FALSE}
+source("setup.R")
+```
+
+
+### Data Visualization with ggplot2
+
+------------
+
+> ### Learning Objectives
+>
+> * Produce scatter plots and histograms using ggplot.
+> * Produce boxplots to summarize data.
+> * Modify the aesthetics of an existing ggplot plot (including axis labels and color).
+> * Build complex and customized plots from data in a data frame.
+> * Set universal plot settings.
+
+--------------
+
+We start by loading the required packages. **`ggplot2`** is included in the **`tidyverse`** package.
+
+```{r load-tidyverse-package, message=FALSE, purl=FALSE}
+library(tidyverse)
+```
+
+Later we will learn how to read in data in R. For now we will compare the mutation rates between samples, starting by loading a table that combines SNP information from multiple samples.
+
+```{r load-SNPs-tidy}
+SNPs_tidy <- read_tsv("data/SNPs_tidy.txt")
+SNPs_tidy
+```                         
+
+
+## Plotting with **`ggplot2`**
+
+**`ggplot2`** is a powerful plotting package that makes it simple to create
+complex plots from data in a data frame. It provides a programmatic interface
+for specifying what variables to plot, how they are displayed, and general
+visual properties. Therefore, we only need small changes to the code if the
+underlying data change or if we decide to change from a bar plot to a
+scatterplot. This interface helps in creating publication quality plots with
+minimal amounts of adjustments and tweaking.
+
+**`ggplot2`** functions like data in the 'long' tidy format, i.e., a column for
+every dimension, and a row for every observation. Well-structured data will save
+you lots of time when making figures with **`ggplot2`**. We start learning R by using **`ggplot2`** because it relies on concepts that we will need when we talk about data transformation in the next lessons.
+
+ggplot graphics are built step by step by adding new elements. Adding layers in
+this fashion allows for extensive flexibility and customization of plots.
+
+To build a ggplot, we will use the following basic template that can be used for different types of plots:
+
+```r
+ggplot(data = <DATA>, mapping = aes(<MAPPINGS>)) + <GEOM_FUNCTION>()
+```
+
+- use the `ggplot()` function and bind the plot to a specific data frame using the `data` argument
+
+```{r, eval=FALSE, purl=FALSE}
+ggplot(data = SNPs_tidy)
+```
+
+- define a mapping (using the aesthetic (`aes`) function), by selecting the variables to be plotted and specifying how to present them in the graph, e.g. as x/y positions or characteristics such as size, shape, color, etc.
+
+```{r, eval=FALSE, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = POS, y = REF))
+```
+
+- add 'geoms' – graphical representations of the data in the plot (points,
+  lines, bars). **`ggplot2`** offers many different geoms; we will use some 
+  common ones today, including:
+  
+      * `geom_point()` for scatter plots, dot plots, etc.
+      * `geom_boxplot()` for, well, boxplots!
+      * `geom_line()` for trend lines, time series, etc.  
+
+To add a geom to the plot use the `+` operator. Because we have two continuous variables, let's use `geom_point()` first to create a scatter plot:
+
+```{r first-ggplot, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = POS, y = REF)) +
+    geom_point()
+```
+
+The `+` in the **`ggplot2`** package is particularly useful because it allows
+you to modify existing `ggplot` objects. This means you can easily set up plot
+templates and explore different types of plots, so the above plot can also be
+generated with code like this:
+
+```{r, first-ggplot-with-plus, eval=FALSE, purl=FALSE}
+## Assign plot to a variable
+SNPs_plot <- ggplot(data = SNPs_tidy, aes(x = POS, y = REF))
+## Draw the plot
+SNPs_plot + 
+    geom_point()
+```
+
+## Building your plots iteratively
+
+<!-- the instructor guide should explain that for this section, the instructor should modify the same line of code instead of retyping each iteration -->
+
+Building plots with **`ggplot2`** is typically an iterative process. We start by
+defining the dataset we'll use, lay out the axes, and choose a geom:
+
+```{r create-ggplot-object, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = POS, y = REF)) +
+    geom_point()
+```
+
+Now, we can start modifying this plot to extract more information from it. We can  add colors for all the points:
+
+```{r adding-colors, purl=FALSE}					
+ggplot(data = SNPs_tidy, aes(x = POS, y = REF)) +
+    geom_point(color = "blue")
+```
+
+Or to color each alternate nucleotide substitution in the plot differently, you could specify the variable to use to the `color` argument within `aes()`:
+
+
+```{r color-by-alternative, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = POS, y = REF)) +
+    geom_point(aes(color = ALT))
+```
+
+In this case **`ggplot2`** will automatically assign one color for each species.
+
+Now at least we learnt some biology! G>C mutations are rare compared to G>T or G>A. 
+
+> ### Challenge
+>
+> Use `shape` to differentiate reference nucleotide.
+
+> ### Challenge
+>
+> Create a visualization that shows if variant call quality (QUAL) varies with 
+> reference nucleotide
+> 
+> - Use QUAL as the y variable
+> 
+> Does quality also change with alternative variant?
+> 
+> - Colour the points by alternative nucleotide
+
+## Density plots
+
+What if we want to see the density of these across the genome (POSITION)?
+
+GGplot provides histogram and smoothed density plots to enable this.
+
+```{r pos-density, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x=POS)) +
+    geom_histogram()
+```
+
+It is often helpful to control the width of histogram bins:
+
+```{r pos-density-narrow, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x=POS)) +
+    geom_histogram(binwidth = 100000)
+```
+
+> ### Challenge
+> 
+> Make a smoothed kernel density plot using `geom_density`.
+> 
+> - Can you change the smoothing width using the bandwidth `bw` argument?
+> - Can you colour by mutation type (MUT)?
+>
+
+
+## Bar plots
+
+What if we just want to count the different substitutions and display in a bar plot? The `geom_bar` command will help with this.
+
+To count the number of substitutions with a given reference:
+
+```{r barplot-ref, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = MUT)) +
+    geom_bar()
+```
+
+Now, to count the number of substitutions with a given reference and alternate combination, we could try to use color:
+
+```{r barplot-color-by-alternative, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = MUT, color = SAMPLE)) +
+    geom_bar()
+```
+
+In fact, the `color` aesthetic governs the outside of the bar, and `fill` is needed to fill the inside:
+
+```{r barplot-fill-by-alternative, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = MUT, fill = SAMPLE)) +
+    geom_bar()
+```
+
+To plot the bars dodged next to each other instead of stacked on top, we use the `position=position_dodge()`.
+
+```{r barplot-fill-by-alternative-dodge, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = MUT, fill = SAMPLE)) +
+    geom_bar(position=position_dodge())
+```
+
+
+> ### Challenge
+>
+> Can you make SAMPLE the x-axis, and MUT the fill variable? 
+> Which graph is more informative?
+>
+
+
+## Preventing points being plotted on top of each other
+
+The position functions are very useful for avoiding plotting things on top of each other. A scatterplot of quality scores for each mutation type is here:
+
+```{r quality, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
+    geom_point()
+```
+
+Many points are on top, we can't see the distribution. We can fix this with scatterplots with 'position="jitter"`. 
+
+```{r quality-jitter, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
+    geom_point(position=position_jitter())
+```
+
+This `jitters` the points by a random amount in the x-direction, to make them visually separate. We can make better plots by controlling exactly how we jitter, for example by the `width` argument.
+
+```{r quality-jitter-thin, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
+    geom_point(position=position_jitter(width=0.1))
+```
+
+> ### Challenge: removing overplotting
+>
+> Which jitter width gives the clearest plot?
+>
+
+## Boxplots to summarize data
+
+Another way to summarize data is the boxplot
+
+```{r quality-boxplot, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
+    geom_boxplot()
+```
+
+We can change colour and fill for a better-looking boxplot:
+
+```{r quality-boxplot-blue, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
+    geom_boxplot(color="blue",fill=NA)
+```
+
+You can also plot multiple aesthetics on top of each other, so both a scatter plot and a boxplot.
+
+```{r quality-boxplot-point, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x = MUT, y=QUAL)) +
+    geom_point(position=position_jitter()) + 
+    geom_boxplot(color="blue",fill=NA)
+```
+
+> ### Challenge: changing boxplot appearance
+>
+> Can you stop the outlier points be plotted by boxplot?
+>
+> - Try ?geom_boxplot for the help file, and search for "hiding the outliers" for instructions
+>
+> Can you make it easier to see the boxplot over the points?
+> 
+> - Try changing the `colour` or `alpha` of the points.
+> - Try changing the line `size` of the boxplot.
+> 
+> Can you change the width of the boxplot *and* the position_jitter to match?
+>
+
+## Faceting
+
+**`ggplot2`** has a special technique called *faceting* that allows the user to
+split one plot into multiple plots based on discrete variables included in the
+dataset.
+
+Let's try the position histogram again
+
+```{r pos-density-again, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x=POS)) +
+    geom_histogram()
+```
+
+Now we can facet by sample, to get the count in each sample:
+
+```{r pos-density-facet, purl=FALSE}
+ggplot(data = SNPs_tidy, aes(x=POS)) +
+    geom_histogram() +
+    facet_wrap(~SAMPLE)
+```
+
+This again makes it clear that the number and position of mutations varies hugely between samples. 
+
+
+
+> ### Challenge
+>
+> Can you facet by mutation type? 
+> 
+> Can you stack all plots on top of each other to compare position?
+>
+> - Try the `ncol` argument to facet_wrap
+> - Or try `facet_grid`
+> 
+
+
+## Customizing your plot
+
+### **`ggplot2`** themes
+
+In addition to `theme_bw()`, which changes the plot background to white, **`ggplot2`**
+comes with several other themes which can be useful to quickly change the look
+of your visualization. The complete list of themes is available
+at <http://docs.ggplot2.org/current/ggtheme.html>. `theme_minimal()` and
+`theme_light()` are popular, and `theme_void()` can be useful as a starting
+point to create a new hand-crafted theme.
+
+The
+[ggthemes](https://cran.r-project.org/web/packages/ggthemes/vignettes/ggthemes.html)
+package provides a wide variety of options (including an Excel 2003 theme). The
+[**`ggplot2`** extensions website](https://www.ggplot2-exts.org) provides a list
+of packages that extend the capabilities of **`ggplot2`**, including additional
+themes.
+
+There are many other options to change the plot appearance
+
+### Changing the axes
+
+* xlab
+* ylab
+* ggtitle
+
+### Changing the legend
+
+* labels
+* legend position
+
+> ### Challenge: plot appearance
+>
+> Can you change the appearance of your plot?
+>
+> - change overall appearance by adding theme_bw()?
+> - change the x-axis label with xlab?
+> - give your plot a title with ggtitle?
+> 
+
+
+## Arranging and Exporting 
+
+* Show how to use ggsave, save files to `fig_output/` folder
+
+
+<!--- things that could be added:
+
+- geom_smooth() to show how to fit linear smoothing/linear lines
+- geom_bar()/geom_col() and stacking/dodging
+- difference between color and fill
+
+--->
+
+
+
+### More resources
+
+* [ggthemeassist](https://github.com/calligross/ggthemeassist) is a RStudio-Addin that uses the [`rstudioapi`](https://github.com/rstudio/rstudioapi) package and provides a GUI for editing **`ggplot2`** themes.
+* [ggedit](https://github.com/metrumresearchgroup/ggedit) is an R package that is used to facilitate **`ggplot2`** formatting. Aesthetic details can be refined easily.
+
+```{r, child="_page_built_on.Rmd"}
+```
+
+
+```{r, eval=FALSE,purl=FALSE}
+read_SRRvcf <- function(Sample="SRR097977",
+                        prefix="data/",
+                        suffix="_final_variants.vcf",
+                        col_names=c("CHROM","POS","ID","REF","ALT",
+                                    "QUAL","FILTER","INFO","FORMAT","VALUES")) {
+    paste0(prefix,Sample,suffix) %>%
+        read_tsv(col_names=col_names,comment="#") %>%
+        mutate(SAMPLE=Sample)
+        
+}
+
+variants_tidy <- list("SRR097977","SRR098026","SRR098027","SRR098028","SRR098281","SRR098283") %>%
+    lapply(read_SRRvcf) %>%
+    bind_rows
+
+write_tsv(variants_tidy,"data/variants_tidy.txt")
+
+add_mutationtype <- function(vdf,
+                             mutkey=c("A>T"="AT>TA",
+                                      "A>C"="AT>CG",
+                                      "A>G"="AT>GC",
+                                      "C>T"="CG>TA",
+                                      "C>A"="CG>AT",
+                                      "C>G"="CG>GC",
+                                      "T>A"="AT>TA",
+                                      "T>G"="AT>CG",
+                                      "T>C"="AT>GC",
+                                      "G>A"="CG>TA",
+                                      "G>T"="CG>AT",
+                                      "G>C"="CG>GC"),
+                             mutlevels=c("AT>TA",
+                                      "AT>CG",
+                                      "AT>GC",
+                                      "CG>TA",
+                                      "CG>AT",
+                                      "CG>GC")) {
+    vdf %>% 
+        mutate(MUT=paste(REF,ALT,sep=">") %>%
+                   mutkey[.] %>%
+                   factor(levels=mutlevels))
+}
+
+SNPs_tidy <- variants_tidy %>%
+    filter(REF %in% single_nucs, ALT %in% single_nucs) %>%
+    add_mutationtype %>%
+    select(-ID,-FILTER)
+
+write_tsv(SNPs_tidy,"data/SNPs_tidy.txt")
+```
+
