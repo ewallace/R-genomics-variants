@@ -84,11 +84,7 @@ ggplot(data = SNPs_tidy, aes(x=POS)) +
 
 
 ### Presentation of the survey data
-## download.file(url="https://ndownloader.figshare.com/files/2292169",
-##               destfile = "data/portal_data_joined.csv")
 library("tidyverse")
-## download.file(url="https://ndownloader.figshare.com/files/2292169",
-##               destfile = "data/portal_data_joined.csv")
 variants
 
 ## Challenge

@@ -46,7 +46,9 @@ the data and install everything *before* working through this lesson.
 
 ### Data
 
-Data files for the lesson are available and can be downloaded manually:
+Data files for the lesson are available and included in this github in the data directory (https://github.com/ewallace/R-genomics-variants/data).
+
+They can also be downloaded manually from here:
 
 https://datasync.ed.ac.uk/index.php/s/joLsSXedpyaABHe
 

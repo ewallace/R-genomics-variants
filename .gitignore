@@ -16,8 +16,6 @@
 
 # vim backup files
 *.swp
-/data/
-portal-database.sqlite
 data_output/
 .secret/
 _site/
